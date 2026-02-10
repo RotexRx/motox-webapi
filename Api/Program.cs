@@ -49,7 +49,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNext",
         policy => policy
-            .AllowAnyOrigin()
+            .WithOrigins("http://87.120.84.139:3000") // اینجا origin خودت
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
