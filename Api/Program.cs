@@ -98,6 +98,13 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000); // HTTP
+    
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
