@@ -9,7 +9,7 @@ namespace Infrastructure.Persistence
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
-            optionsBuilder.UseSqlServer("Server=localhost,1433;Database=MotoXDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("Server=127.0.0.1,1433;Database=MotoXDb;User Id=sa;Password=RotexMotox@2026;TrustServerCertificate=True;");
 
             return new AppDbContext(optionsBuilder.Options);
         }
