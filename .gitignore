@@ -1,0 +1,17 @@
+# Build folders
+**/bin/
+**/obj/
+
+# VS and user files
+.vs/
+*.user
+*.suo
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+
+# Logs
+*.log
