@@ -49,10 +49,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNext",
         policy => policy
-            .WithOrigins("http://localhost:3000") // Next.js dev port
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
+
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
