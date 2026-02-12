@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Entities.Comments;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using MotoX.Domain.Entities;
@@ -29,6 +30,31 @@ namespace Infrastructure.Repositories
 
             await _context.Advertisements.AddAsync(ad, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task NewComment(Comment comment, CancellationToken cancellationToken)
+        {
+
+            await _context.Comments.AddAsync(comment, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+
+        public async Task<List<CommentDto>> GetCommentsAsync(int Id, CancellationToken cancellationToken)
+        {
+            var ads = await _context.Comments
+            .Where(w => w.AdvertisementId == Id).ToListAsync();
+
+            var adsDto = ads.Select(b => new CommentDto
+            {
+                Message = b.Message,
+                Id = b.Id,
+                Reply = b.Reply,
+                Username = b.Username
+
+            }).ToList();
+
+            return adsDto;
         }
 
         public async Task<Advertisement?> GetByIdAsync(int id, CancellationToken cancellationToken)
@@ -76,7 +102,7 @@ namespace Infrastructure.Repositories
                 .ToList(),
                 SuspensionHealth = b.SuspensionHealth,
                 TireHealth = b.TireHealth,
-
+                Features = b.Features,
             }).ToList();
         }
 
@@ -117,8 +143,30 @@ namespace Infrastructure.Repositories
                 )).ToList(),
                 SuspensionHealth = b.SuspensionHealth,
                 TireHealth = b.TireHealth,
+                Features = b.Features,
 
             }).ToList();
+        }
+
+
+
+        public async Task<bool> Reply(
+             int id,
+             string reply,
+             CancellationToken cancellationToken)
+        {
+            var comments = await _context.Comments
+                .FirstOrDefaultAsync(w => w.AdvertisementId == id, cancellationToken);
+
+            if (comments == null) return false;
+
+
+            comments.Reply = reply;
+
+            _context.Comments.Update(comments);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return true;
         }
 
         public async Task<bool> Approve(
@@ -128,7 +176,7 @@ namespace Infrastructure.Repositories
           CancellationToken cancellationToken)
         {
             var ad = await _context.Advertisements
-                .Include(a => a.Histories) // لود کردن تاریخچه‌ها
+                .Include(a => a.Histories)
                 .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
 
             if (ad == null) return false;
@@ -163,7 +211,6 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> ApproveAndEditAsync(EditAdvertisementDto model, CancellationToken cancellationToken)
         {
-            // 1. پیدا کردن آگهی شامل عکس‌ها و تاریخچه‌ها
             var ad = await _context.Advertisements
                 .Include(a => a.Images)
                 .Include(a => a.Histories)
@@ -171,7 +218,6 @@ namespace Infrastructure.Repositories
 
             if (ad == null) return false;
 
-            // 2. بروزرسانی فیلدهای متنی و عددی
             ad.Brand = model.Brand;
             ad.Model = model.Model;
             ad.Year = model.Year;
@@ -179,11 +225,9 @@ namespace Infrastructure.Repositories
             ad.Mileage = model.Mileage;
             ad.Description = model.Description;
 
-            // تغییر وضعیت به تایید شده
             ad.Published = true;
             ad.Status = AdvertisementStatus.Approved;
 
-            // 3. بروزرسانی سلامت فنی
             if (model.Health != null)
             {
                 ad.EngineHealth = (byte)model.Health.Engine;
@@ -191,26 +235,19 @@ namespace Infrastructure.Repositories
                 ad.TireHealth = (byte)model.Health.Tires;
             }
 
-            // ==========================================================
-            // 4. مدیریت پیشرفته تصاویر (حذف، نگهداری، افزودن جدید)
-            // ==========================================================
-
             if (model.Images != null)
             {
-                // الف) حذف تصاویری که در لیست جدید نیستند
-                // لیست URLهایی که کلاینت فرستاده و عکس قدیمی هستند (Base64 نیستند)
+
                 var existingUrlsInRequest = model.Images
                     .Where(img => !img.Contains("base64"))
                     .ToList();
 
-                // عکس‌هایی که در دیتابیس هستند اما در لیست ارسالی کلاینت نیستند -> باید حذف شوند
                 var imagesToDelete = ad.Images
                     .Where(dbImg => !existingUrlsInRequest.Any(reqUrl => reqUrl.Contains(Path.GetFileName(dbImg.Url))))
                     .ToList();
 
                 foreach (var img in imagesToDelete)
                 {
-                    // 1. حذف فایل فیزیکی
                     try
                     {
                         var fileName = Path.GetFileName(img.Url);
@@ -222,14 +259,11 @@ namespace Infrastructure.Repositories
                     }
                     catch
                     {
-                        // لاگ کردن خطا یا نادیده گرفتن در صورت عدم وجود فایل
                     }
 
-                    // 2. حذف از دیتابیس
                     _context.AdvertisementImages.Remove(img);
                 }
 
-                // ب) افزودن تصاویر جدید (Base64)
                 var newImagesBase64 = model.Images
                     .Where(img => img.Contains("base64"))
                     .ToList();
@@ -238,27 +272,20 @@ namespace Infrastructure.Repositories
                 {
                     try
                     {
-                        // تشخیص فرمت و تبدیل Base64 به بایت
                         var base64Data = base64Str.Substring(base64Str.IndexOf(",") + 1);
                         var imageBytes = Convert.FromBase64String(base64Data);
 
-                        // تعیین پسوند فایل
                         string extension = ".jpg";
                         if (base64Str.Contains("image/png")) extension = ".png";
                         else if (base64Str.Contains("image/jpeg")) extension = ".jpg";
                         else if (base64Str.Contains("image/webp")) extension = ".webp";
 
-                        // ایجاد نام یکتا
                         var fileName = $"{Guid.NewGuid()}{extension}";
                         var filePath = Path.Combine(_uploadFolder, fileName);
 
-                        // ذخیره فایل در دیسک
                         await File.WriteAllBytesAsync(filePath, imageBytes, cancellationToken);
 
-                        // ذخیره در دیتابیس
-                        // فرض بر این است که Url به صورت نسبی یا کامل ذخیره می‌شود (مثلا: /Uploads/filename.jpg)
-                        // در اینجا فرض کردیم آدرس نسبی ذخیره می‌شود تا با فرانت هماهنگ باشد
-                        var fileUrl = $"/Uploads/{fileName}"; // یا آدرس کامل سرور بسته به تنظیمات شما
+                        var fileUrl = $"/Uploads/{fileName}";
 
                         await _context.AdvertisementImages.AddAsync(new AdvertisementImage
                         {
@@ -268,15 +295,11 @@ namespace Infrastructure.Repositories
                     }
                     catch (Exception ex)
                     {
-                        // هندل کردن خطا در صورت مشکل در آپلود عکس خاص
                         Console.WriteLine($"Error saving image: {ex.Message}");
                     }
                 }
             }
 
-            // ==========================================================
-
-            // 5. مدیریت تاریخچه (Recreate strategy - حذف همه و ساخت مجدد ساده‌ترین راه برای لیست‌های کوچک است)
             if (ad.Histories != null && ad.Histories.Any())
             {
                 _context.VehicleHistory.RemoveRange(ad.Histories);
@@ -294,7 +317,15 @@ namespace Infrastructure.Repositories
                 await _context.VehicleHistory.AddRangeAsync(newHistories, cancellationToken);
             }
 
-            // 6. ذخیره نهایی در دیتابیس
+            if (model.Features != null)
+            {
+                ad.Features = model.Features;
+            }
+            else
+            {
+                ad.Features = new List<string>();
+            }
+
             _context.Advertisements.Update(ad);
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -374,6 +405,7 @@ namespace Infrastructure.Repositories
                 EngineHealth = query.EngineHealth,
                 SuspensionHealth = query.SuspensionHealth,
                 TireHealth = query.TireHealth,
+                Features = query.Features,
 
                 SellerName = _context.Users
                     .Where(u => u.Id == query.UserId)
@@ -384,6 +416,7 @@ namespace Infrastructure.Repositories
                 Histories = histories
             };
         }
+
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Entities.Comments;
 using Domain.Entities.Contact;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -20,6 +21,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole, str
     public DbSet<AdvertisementImage> AdvertisementImages { get; set; } = default!;
     public DbSet<Contact> Contacts { get; set; } = default!;
     public DbSet<VehicleHistory> VehicleHistory { get; set; } = default!;
+    public DbSet<Comment> Comments { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

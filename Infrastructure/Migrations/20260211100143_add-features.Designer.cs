@@ -4,6 +4,7 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260211100143_add-features")]
+    partial class addfeatures
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,35 +112,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Advertisements");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Comments.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AdvertisementId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Reply")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AdvertisementId");
-
-                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Domain.Entities.Contact.Contact", b =>
@@ -535,17 +509,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Advertisement");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Comments.Comment", b =>
-                {
-                    b.HasOne("Domain.Entities.Advertisement", "Advertisement")
-                        .WithMany("Comments")
-                        .HasForeignKey("AdvertisementId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Advertisement");
-                });
-
             modelBuilder.Entity("Domain.Entities.VehicleHistory", b =>
                 {
                     b.HasOne("Domain.Entities.Advertisement", "Advertisement")
@@ -643,8 +606,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Advertisement", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("Histories");
 
                     b.Navigation("Images");

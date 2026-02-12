@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
- 
+using Domain.Entities.Comments;
+
 namespace Domain.Entities;
 
 public class Advertisement
@@ -32,18 +33,12 @@ public class Advertisement
 
     public byte EngineHealth { get; set; }  
     public byte SuspensionHealth { get; set; } 
-    public byte TireHealth { get; set; }  
-
+    public byte TireHealth { get; set; }
+    public List<string> Features { get; set; } = new();
     public ICollection<VehicleHistory>? Histories { get; set; } = new List<VehicleHistory>();
 
+    public ICollection<Comment>? Comments { get; set; } = new List<Comment>();
+     
+
 }
 
-public class VehicleHistory
-{
-    public int Id { get; set; }
-    public string Description { get; set; }
-    public string Date { get; set; }
-
-    public int AdvertisementId { get; set; }
-    public Advertisement Advertisement { get; set; }
-}
