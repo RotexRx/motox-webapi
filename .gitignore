@@ -15,3 +15,6 @@ dist/
 
 # Logs
 *.log
+
+/Api/appsettings.Development.json
+/Api/appsettings.Development.json

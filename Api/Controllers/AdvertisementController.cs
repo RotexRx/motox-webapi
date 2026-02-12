@@ -3,6 +3,7 @@ using Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Ocsp;
 
 
 namespace Api.Controllers
@@ -35,6 +36,7 @@ namespace Api.Controllers
             };
             return Ok(response);
         }
+
 
         [HttpGet("list")]
         public async Task<IActionResult> GetAdvertisements(

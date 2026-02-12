@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
- 
+
 using MotoX.Application;
 using MotoX.Domain.Entities;
 using MotoX.Infrastructure;
- 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -25,11 +25,11 @@ builder.Services.AddControllers();
 // Clean Architecture
 builder.Services.AddApplication();
 
-builder.Services.AddApplication();       
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);  // DbContext
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
- 
+
 
 
 builder.Services.AddHttpContextAccessor();
@@ -42,6 +42,7 @@ builder.Services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 // Swagger
 
@@ -50,7 +51,6 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowNext",
         policy => policy
             .WithOrigins("http://87.120.84.139:3000") // اینجا origin خودت
-            .AllowAnyHeader()
             .AllowAnyMethod());
 });
 
@@ -77,10 +77,11 @@ builder.Services
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => {
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
     options.User.RequireUniqueEmail = true;
 })
-.AddRoles<IdentityRole>() // این خط برای پشتیبانی از نقش‌ها حیاتی است
+.AddRoles<IdentityRole>() 
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
@@ -94,7 +95,7 @@ builder.Services.AddRateLimiter(options =>
     options.AddFixedWindowLimiter("auth-policy", opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = 7; 
+        opt.PermitLimit = 7;
         opt.QueueLimit = 0;
     });
 });
@@ -102,20 +103,28 @@ builder.Services.AddRateLimiter(options =>
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5000); // HTTP
-    
+
 });
 
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
+ 
 if (app.Environment.IsDevelopment())
 {
- 
+
 }
 
 
 app.UseCors("AllowNext");
+
+var uploadsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Uploads");
+
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
+
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Uploads")),
@@ -125,7 +134,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRateLimiter();  
+app.UseRateLimiter();
 
 app.MapControllers();
 
@@ -147,7 +156,7 @@ using (var scope = app.Services.CreateScope())
             }
         }
 
-        var adminEmail = "rotex2021rx@gmail.com"; 
+        var adminEmail = "rotex2021rx@gmail.com";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
         if (adminUser == null)
@@ -165,14 +174,14 @@ using (var scope = app.Services.CreateScope())
                 var newUser = await userManager.FindByEmailAsync(adminEmail);
                 await userManager.AddToRoleAsync(newUser, "Admin");
             }
-            
+
         }
 
         if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
         {
             await userManager.AddToRoleAsync(adminUser, "Admin");
         }
-        
+
 
     }
     catch (Exception ex)
@@ -183,4 +192,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
- 
+
+
