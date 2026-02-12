@@ -13,5 +13,6 @@ public class CreateAdvertisementCommand : IRequest<int>
     public string PhoneNumber { get; set; } = default!;
     public string Description { get; set; } = default!;
     public bool Published { get; set; }
+    public List<string> Features { get; set; } = new();
     public List<string> ImagesBase64 { get; set; } = new();
 }

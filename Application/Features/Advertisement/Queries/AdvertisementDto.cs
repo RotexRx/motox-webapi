@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Entities.Comments;
 
 public class AdvertisementDto
 {
@@ -23,8 +24,10 @@ public class AdvertisementDto
     public byte EngineHealth { get; set; }
     public byte SuspensionHealth { get; set; }
     public byte TireHealth { get; set; }
-
+    public List<string> Features { get; set; } = new();
     public List<HistoryDto>? Histories { get; set; } = new();
+
+    public ICollection<Comment>? Comments { get; set; } = new List<Comment>();
+
 }
 
- 

@@ -16,5 +16,8 @@ public class EditAdvertisementDto
 
     public List<string> Images { get; set; } // لیست URL تصاویر
     public HealthDto Health { get; set; }
+
+    public List<string> Features { get; set; } = new();
+
     public List<HistoryDto> History { get; set; }
 }

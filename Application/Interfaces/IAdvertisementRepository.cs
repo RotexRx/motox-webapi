@@ -1,6 +1,7 @@
 ﻿
 using Application.DTOs;
 using Domain.Entities;
+using Domain.Entities.Comments;
 
 namespace Application.Interfaces;
 
@@ -17,6 +18,7 @@ public interface IAdvertisementRepository
 
     Task<List<AdvertisementDto>> GetAllAsync(int? Count,CancellationToken cancellationToken);
 
+    
     Task<AdvertisementDto> GetAsync(int Id, CancellationToken cancellationToken);
 
  
@@ -30,6 +32,5 @@ public interface IAdvertisementRepository
 
     Task<bool> Reject(int adId, CancellationToken cancellationToken);
     Task<bool> Delete(int adId, CancellationToken cancellationToken);
-
     Task<bool> ApproveAndEditAsync(EditAdvertisementDto model, CancellationToken cancellationToken);
 }
