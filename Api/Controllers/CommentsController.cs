@@ -35,7 +35,6 @@ namespace Api.Controllers
         }
 
         [HttpGet("comment/{Id}")]
-        [Authorize]
         public async Task<IActionResult> GetComments([FromServices] ICommentRepository repo, [FromRoute] int Id, CancellationToken ct)
         {
             var ad = await repo.GetCommentsAsync(Id, ct);
@@ -47,8 +46,9 @@ namespace Api.Controllers
             return Ok(response);
         }
 
+
         [HttpGet("comments")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllComments([FromServices] ICommentRepository repo, CancellationToken ct)
         {
             var ad = await repo.GetAllCommentsAsync(ct);
