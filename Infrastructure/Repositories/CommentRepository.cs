@@ -23,81 +23,123 @@ namespace Infrastructure.Repositories
 
         public async Task NewComment(Comment comment, CancellationToken cancellationToken)
         {
+            try
+            {
+                if (comment == null)
+                {
+                    new ArgumentNullException(nameof(comment));
+                }
+                await _context.Comments.AddAsync(comment, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
-            await _context.Comments.AddAsync(comment, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
         }
 
 
         public async Task<List<CommentDto>> GetCommentsAsync(int Id, CancellationToken cancellationToken)
         {
-            var ads = await _context.Comments
-            .Where(w => w.AdvertisementId == Id).ToListAsync();
-
-            var adsDto = ads.Select(b => new CommentDto
+            try
             {
-                Message = b.Message,
-                Id = b.Id,
-                Reply = b.Reply,
-                Username = b.Username
+                var ads = await _context.Comments
+                .Where(w => w.AdvertisementId == Id).ToListAsync();
 
-            }).ToList();
+                var adsDto = ads.Select(b => new CommentDto
+                {
+                    Message = b.Message,
+                    Id = b.Id,
+                    Reply = b.Reply,
+                    Username = b.Username
 
-            return adsDto;
+                }).ToList();
+
+                return adsDto;
+            }
+            catch (Exception)
+            {
+                return new List<CommentDto>();
+            }
+
         }
 
-        public async Task<List<CommentDto>> GetAllCommentsAsync( CancellationToken cancellationToken)
+        public async Task<List<CommentDto>> GetAllCommentsAsync(CancellationToken cancellationToken)
         {
-            var ads = await _context.Comments
-            .ToListAsync();
-
-            var adsDto = ads.Select(b => new CommentDto
+            try
             {
-                Message = b.Message,
-                Id = b.Id,
-                Reply = b.Reply,
-                Username = b.Username,
-                AdId = b.AdvertisementId
+                var ads = await _context.Comments
+                .ToListAsync();
 
-            }).ToList();
+                var adsDto = ads.Select(b => new CommentDto
+                {
+                    Message = b.Message,
+                    Id = b.Id,
+                    Reply = b.Reply,
+                    Username = b.Username,
+                    AdId = b.AdvertisementId
 
-            return adsDto;
+                }).ToList();
+                return adsDto;
+            }
+            catch (Exception)
+            {
+                return new List<CommentDto>();
+            }
+
         }
 
-        
+
 
         public async Task<bool> Reply(
              int id,
              string reply,
              CancellationToken cancellationToken)
         {
-            var comments = await _context.Comments
+            try
+            {
+                var comments = await _context.Comments
                 .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
 
-            if (comments == null) return false;
+                if (comments == null) return false;
 
 
-            comments.Reply = reply;
+                comments.Reply = reply;
 
-            _context.Comments.Update(comments);
-            await _context.SaveChangesAsync(cancellationToken);
+                _context.Comments.Update(comments);
+                await _context.SaveChangesAsync(cancellationToken);
 
-            return true;
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
         }
 
-      
+
         public async Task<bool> Delete(int Id, CancellationToken cancellationToken)
         {
-
-            var query = await _context.Comments
+            try
+            {
+                var query = await _context.Comments
                 .Where(w => w.Id == Id).FirstOrDefaultAsync(cancellationToken);
 
-            if (query == null) return false;
+                if (query == null) return false;
 
 
-            _context.Comments.Remove(query);
-            await _context.SaveChangesAsync(cancellationToken);
-            return true;
+                _context.Comments.Remove(query);
+                await _context.SaveChangesAsync(cancellationToken);
+                return true;
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
+            
 
         }
 

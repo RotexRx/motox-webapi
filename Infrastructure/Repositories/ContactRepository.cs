@@ -18,8 +18,20 @@ namespace Infrastructure.Repositories
 
         public async Task CreateAsync(Contact contact, CancellationToken cancellationToken)
         {
-            await _context.Contacts.AddAsync(contact, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                if (contact == null)
+                {
+                    throw new ArgumentNullException(nameof(contact));
+                }
+                await _context.Contacts.AddAsync(contact, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception)
+            { 
+                throw;
+            }
+            
         }
 
      
