@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using Application.Interfaces;
 using MediatR;
-using MotoX.Application.Features.Bikes.Queries.GetLatestBikes;
 
 namespace Application.Features.Users.Queries.GetLatestBikes;
 

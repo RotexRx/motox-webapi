@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using MediatR;
-using MotoX.Application.Features.Bikes.Queries.GetLatestBikes;
 
 namespace Application.Features.Users.Queries;
 
