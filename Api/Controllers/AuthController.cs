@@ -1,4 +1,5 @@
 ﻿using Api.Contracts.Auth;
+using Application.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -134,6 +135,10 @@ public class AuthController : ControllerBase
         var valid = await _userManager.CheckPasswordAsync(user, req.Password);
         if (!valid)
             return Unauthorized(new ApiResponse<object> { Success = false, Message = "نام کاربری یا رمز اشتباه است" });
+
+        var locked = user.Suspended;
+        if (locked)
+            return Unauthorized(new ApiResponse<object> { Success = false, Message = "حساب شما مسدود است" });
 
         var confirmed = await _userManager.IsEmailConfirmedAsync(user);
         if (!confirmed)

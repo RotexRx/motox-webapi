@@ -31,5 +31,31 @@ namespace Api.Controllers
             };
             return Ok(response);
         }
+
+        [HttpPost("suspend/{Id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SuspendUser([FromServices] IUserRepository repo, [FromRoute] string Id, CancellationToken ct)
+        {
+            var suspend = await repo.SuspendUser(Id, ct);
+            if (suspend == false)
+            {
+                return BadRequest(new ApiResponse<object> { Success = true, Message = "خطا در مسدود سازی" });
+            }
+
+            return Ok(new ApiResponse<object> { Success = true, Message = "کاربر با موفقیت مسدود شد" });
+        }
+
+        [HttpPost("unsuspend/{Id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UnSuspendUser([FromServices] IUserRepository repo, [FromRoute] string Id, CancellationToken ct)
+        {
+            var suspend = await repo.UnSuspendUser(Id, ct);
+            if (suspend == false)
+            {
+                return BadRequest(new ApiResponse<object> { Success = true, Message = "خطا در رفع مسدود سازی" });
+            }
+
+            return Ok(new ApiResponse<object> { Success = true, Message = "کاربر با موفقیت رفع مسدودیت شد" });
+        }
     }
 }
