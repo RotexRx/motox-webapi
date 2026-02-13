@@ -13,7 +13,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole, str
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
 
-    public DbSet<Bike> Bikes => Set<Bike>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<ForgotPasswordCode> ForgotPasswordCodes => Set<ForgotPasswordCode>();
     public DbSet<EmailVerificationCode> EmailVerificationCodes { get; set; }
