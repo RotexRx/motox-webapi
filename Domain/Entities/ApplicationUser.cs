@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Domain.Entities.Receipts;
+using Microsoft.AspNetCore.Identity;
 
 namespace MotoX.Domain.Entities;
 

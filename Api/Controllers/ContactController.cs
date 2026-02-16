@@ -1,4 +1,6 @@
-﻿using Application.Features.Contact.Commands;
+﻿using Application.Features.Contact;
+using Application.Features.Contact.Commands;
+using Application.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
 using MediatR;
@@ -41,6 +43,19 @@ namespace Api.Controllers
                 Success = true,
                 Message = "پیام شما با موفقیت ارسال شد",
                 Data = id
+            };
+            return Ok(response);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetContacts([FromServices] IContactRepository repo,CancellationToken ct)
+        {
+            var contact = await repo.GetCommentsAsync(ct);
+            var response = new ApiResponse<List<ContactDto>>
+            {
+                Success = true,
+                Message = "",
+                Data = contact
             };
             return Ok(response);
         }
