@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Comments;
+using Domain.Entities.Receipts;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using MotoX.Domain.Entities;
@@ -99,6 +100,21 @@ namespace Infrastructure.Repositories
                 return null;
             }
             
+        }
+
+        public async Task<List<Receipts>> GetAllReceipts(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _context.Receipts.AsQueryable();
+                var receipts = await query.ToListAsync(cancellationToken);
+                return receipts;
+            }
+            catch (Exception)
+            {
+                return new List<Receipts>();
+            }
+
         }
 
         public async Task<List<AdvertisementDto>> GetAllAsync(int? Count, CancellationToken cancellationToken)
@@ -518,6 +534,47 @@ namespace Infrastructure.Repositories
             
         }
 
+        public async Task<Receipts> GetReceipt(int Id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = await _context.Receipts
+                .Where(w => w.Id == Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+
+                if (query == null)
+                    return new Receipts();
+
+               
+                return new Receipts
+                {
+                    Id = Id,
+                    Price = query.Price,
+                    Url = query.Url,
+                    UserId = query.UserId
+                };
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+        }
+
+        public async Task UploadReceipt(Receipts receipt, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _context.Receipts.AddAsync(receipt, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
 
     }
 }

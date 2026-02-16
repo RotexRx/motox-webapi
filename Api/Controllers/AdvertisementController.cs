@@ -1,9 +1,11 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Domain.Entities.Receipts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Org.BouncyCastle.Ocsp;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 
 namespace Api.Controllers
@@ -36,6 +38,69 @@ namespace Api.Controllers
             };
             return Ok(response);
         }
+
+        [HttpPost("upload")]
+        public async Task<IActionResult> Upload([FromBody] UploadImageCommand req)
+        {
+
+            var id = await _mediator.Send(req);
+            var response = new ApiResponse<int>
+            {
+                Success = true,
+                Message = "رسید با موفقیت اپلود شد",
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("receipt-image/{fileName}")]
+        public IActionResult GetImageReceipt(string fileName)
+        {
+            var uploadsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Receipts");
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound(new ApiResponse<string>
+                {
+                    Success = false,
+                    Message = "فایل پیدا نشد"
+                });
+            }
+
+            var mimeType = "image/png";
+            return PhysicalFile(filePath, mimeType);
+        }
+
+        [HttpGet("receipt/{Id}")]
+        public async Task<IActionResult> GetReceipt(
+                [FromServices] IAdvertisementRepository repo,
+                [FromRoute] int Id,
+                CancellationToken ct)
+        {
+            var receipt = await repo.GetReceipt(Id, ct);
+            var response = new ApiResponse<Receipts>
+            {
+                Success = true,
+                Data = receipt
+            };
+            return Ok(response);
+        }
+
+        [HttpGet("receipts")]
+        public async Task<IActionResult> GetReceipt(
+                [FromServices] IAdvertisementRepository repo,
+                CancellationToken ct)
+        {
+            var receipts = await repo.GetAllReceipts( ct);
+            var response = new ApiResponse<List<Receipts>>
+            {
+                Success = true,
+                Data = receipts
+            };
+            return Ok(response);
+        }
+
+
 
 
         [HttpGet("list")]
@@ -105,6 +170,9 @@ namespace Api.Controllers
             var mimeType = "image/png";
             return PhysicalFile(filePath, mimeType);
         }
+
+        
+
 
         [Authorize(Roles = "Admin")]
         [HttpPost("approve/{id}")]

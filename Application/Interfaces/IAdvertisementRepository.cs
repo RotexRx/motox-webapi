@@ -2,6 +2,7 @@
 using Application.DTOs;
 using Domain.Entities;
 using Domain.Entities.Comments;
+using Domain.Entities.Receipts;
 
 namespace Application.Interfaces;
 
@@ -33,4 +34,10 @@ public interface IAdvertisementRepository
     Task<bool> Reject(int adId, CancellationToken cancellationToken);
     Task<bool> Delete(int adId, CancellationToken cancellationToken);
     Task<bool> ApproveAndEditAsync(EditAdvertisementDto model, CancellationToken cancellationToken);
+
+    Task UploadReceipt(Receipts Receipt, CancellationToken cancellationToken);
+
+    Task<Receipts> GetReceipt(int Id, CancellationToken cancellationToken);
+    Task<List<Receipts>> GetAllReceipts(CancellationToken cancellationToken);
+
 }
