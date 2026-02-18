@@ -101,15 +101,17 @@ namespace Api.Controllers
         }
 
 
-
-
         [HttpGet("list")]
         public async Task<IActionResult> GetAdvertisements(
-            [FromServices] IAdvertisementRepository repo,
-            [FromQuery] int? count,
-            CancellationToken ct)
+            [FromServices] IAdvertisementRepository repo, CancellationToken ct,
+            [FromQuery] int page = 1,     
+            [FromQuery] int pageSize = 6,
+            [FromQuery] string? brand = null 
+            )
         {
-            var ads = await repo.GetAllAsync(count, ct);
+       
+            var ads = await repo.GetAllAsync(ct,page, pageSize, brand);
+
             var response = new ApiResponse<List<AdvertisementDto>>
             {
                 Success = true,
@@ -117,6 +119,8 @@ namespace Api.Controllers
             };
             return Ok(response);
         }
+
+
 
         [HttpGet("get-single/{Id}")]
         public async Task<IActionResult> GetSingleAdvertisement(

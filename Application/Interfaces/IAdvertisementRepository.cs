@@ -17,9 +17,13 @@ public interface IAdvertisementRepository
         int id,
         CancellationToken cancellationToken);
 
-    Task<List<AdvertisementDto>> GetAllAsync(int? Count,CancellationToken cancellationToken);
+    Task<List<AdvertisementDto>> GetAllAsync(
+            CancellationToken cancellationToken,
+            int page,
+            int pageSize,
+            string? brand);
 
-    
+
     Task<AdvertisementDto> GetAsync(int Id, CancellationToken cancellationToken);
 
  

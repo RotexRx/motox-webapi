@@ -117,23 +117,30 @@ namespace Infrastructure.Repositories
 
         }
 
-        public async Task<List<AdvertisementDto>> GetAllAsync(int? Count, CancellationToken cancellationToken)
+        public async Task<List<AdvertisementDto>> GetAllAsync(CancellationToken cancellationToken,int page, int pageSize, string? brand)
         {
             try
             {
                 var query = _context.Advertisements
-                .Where(w => w.Published == true)
-                .Include(a => a.Images)
-                .Include(a => a.Histories)
-                .AsQueryable();
+                    .Where(w => w.Published == true)
+                    .Include(a => a.Images)
+                    .Include(a => a.Histories)
+                    .AsQueryable();
+                 
+                if (!string.IsNullOrEmpty(brand) && brand.ToLower() != "all")
+                {
+                    query = query.Where(w => w.Brand.ToLower() == brand.ToLower());
+                }
+                 
+                query = query.OrderByDescending(o => o.CreatedAt);
 
-
-                if (Count.HasValue)
-                    query = query.Take(Count.Value);
-
-                var ads = await query.ToListAsync(cancellationToken);
-
-                return ads.Select(b => new AdvertisementDto
+ 
+                var pagedAds = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+                 
+                return pagedAds.Select(b => new AdvertisementDto
                 {
                     Id = b.Id,
                     Brand = b.Brand,
@@ -150,12 +157,7 @@ namespace Infrastructure.Repositories
                     PhoneNumber = b.PhoneNumber,
                     CreatedAt = b.CreatedAt,
                     EngineHealth = b.EngineHealth,
-                    Histories = b.Histories
-                    .Select(h => new HistoryDto(
-                        h.Description,
-                        h.Date
-                    ))
-                    .ToList(),
+                    Histories = b.Histories.Select(h => new HistoryDto(h.Description, h.Date)).ToList(),
                     SuspensionHealth = b.SuspensionHealth,
                     TireHealth = b.TireHealth,
                     Features = b.Features,
@@ -163,9 +165,8 @@ namespace Infrastructure.Repositories
             }
             catch (Exception)
             {
-                return new List<AdvertisementDto>(); 
+                return new List<AdvertisementDto>();
             }
-            
         }
 
         public async Task<List<AdvertisementDto>> GetAllAsyncAdmin(int? Count, CancellationToken cancellationToken)
