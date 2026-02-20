@@ -13,7 +13,7 @@ public class EditAdvertisementDto
     public long Price { get; set; }
     public int Mileage { get; set; }
     public string Description { get; set; }
-
+    public int EngineVolume { get; set; }
     public List<string> Images { get; set; } // لیست URL تصاویر
     public HealthDto Health { get; set; }
 

@@ -8,6 +8,9 @@ public class AdvertisementDto
     public string Model { get; set; } = default!;
     public int Year { get; set; }
     public int Mileage { get; set; }
+
+    public int EngineVolume { get; set; }
+
     public long Price { get; set; }
     public string PhoneNumber { get; set; } = default!;
 

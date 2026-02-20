@@ -161,6 +161,7 @@ namespace Infrastructure.Repositories
                     SuspensionHealth = b.SuspensionHealth,
                     TireHealth = b.TireHealth,
                     Features = b.Features,
+                    EngineVolume = b.EngineVolume,
                 }).ToList();
             }
             catch (Exception)
@@ -209,6 +210,7 @@ namespace Infrastructure.Repositories
                     SuspensionHealth = b.SuspensionHealth,
                     TireHealth = b.TireHealth,
                     Features = b.Features,
+                    EngineVolume = b.EngineVolume,
 
                 }).ToList();
             }
@@ -313,6 +315,7 @@ namespace Infrastructure.Repositories
                 ad.Price = model.Price;
                 ad.Mileage = model.Mileage;
                 ad.Description = model.Description;
+                ad.EngineVolume = model.EngineVolume;
 
                 ad.Published = true;
                 ad.Status = AdvertisementStatus.Approved;
@@ -525,7 +528,8 @@ namespace Infrastructure.Repositories
                         .FirstOrDefault() ?? "Unknown",
 
                     Images = queryImages,
-                    Histories = histories
+                    Histories = histories,
+                    EngineVolume = query.EngineVolume,
                 };
             }
             catch (Exception)

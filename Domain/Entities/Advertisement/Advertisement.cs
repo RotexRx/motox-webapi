@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Domain.Entities.Comments;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Domain.Entities;
 
@@ -13,6 +14,7 @@ public class Advertisement
     public string Model { get; set; } = default!;
     public int Year { get; set; }
     public int Mileage { get; set; }
+    public int EngineVolume { get; set; }
 
     public DocumentStatus DocumentStatus { get; set; }
 
